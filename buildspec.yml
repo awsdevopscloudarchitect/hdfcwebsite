@@ -1,24 +1,26 @@
+
 version: 0.2
 
 env:
   variables:
-    AWS_ACCOUNT_ID: "322814813226"
-    AWS_DEFAULT_REGION: "us-east-1"
+    AWS_ACCOUNT_ID: "488914879248"
+    AWS_DEFAULT_REGION: "ap-south-1"
+    ECR_REPOSITORY: "hdfcwebsite"
 
 phases:
   pre_build:
     commands:
-      - echo "Logging in to Amazon ECR"
+      - echo Logging in to Amazon ECR
       - aws ecr get-login-password --region "$AWS_DEFAULT_REGION" | docker login --username AWS --password-stdin "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com"
 
   build:
     commands:
-      - echo "Building Insurance image"
+      - echo Building Insurance image
       - cd insurance
       - docker build -t hdfc-insurance:latest .
-      - docker tag hdfc-insurance:latest "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/hdfc-insurance:latest"
-      - docker push "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/hdfc-insurance:latest"
+      - docker tag hdfc-insurance:latest "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$ECR_REPOSITORY:latest"
+      - docker push "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$ECR_REPOSITORY:latest"
 
   post_build:
     commands:
-      - echo "Insurance application built successfully"
+      - echo Insurance image pushed successfully
