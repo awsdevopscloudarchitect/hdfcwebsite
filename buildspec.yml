@@ -6,6 +6,7 @@ env:
     AWS_ACCOUNT_ID: "488914879248"
     AWS_DEFAULT_REGION: "ap-south-1"
     ECR_REPOSITORY: "hdfcwebsite"
+    CONTAINER_NAME: "hdfc-insurance"
 
 phases:
   pre_build:
@@ -23,4 +24,11 @@ phases:
 
   post_build:
     commands:
-      - echo Insurance image pushed successfully
+      - echo Creating imagedefinitions.json
+      - printf '[{"name":"%s","imageUri":"%s"}]' "$CONTAINER_NAME" "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$ECR_REPOSITORY:latest" > imagedefinitions.json
+      - cat imagedefinitions.json
+
+artifacts:
+  files:
+    - imagedefinitions.json
+  discard-paths: yes
