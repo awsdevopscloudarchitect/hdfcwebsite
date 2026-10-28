@@ -1,4 +1,4 @@
-
+```yaml
 version: 0.2
 
 env:
@@ -11,24 +11,26 @@ env:
 phases:
   pre_build:
     commands:
-      - echo Logging in to Amazon ECR
+      - echo "Logging in to Amazon ECR"
       - aws ecr get-login-password --region "$AWS_DEFAULT_REGION" | docker login --username AWS --password-stdin "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com"
 
   build:
     commands:
-      - echo Building Insurance image
-      - cd insurance
-      - docker build -t hdfc-insurance:latest .
+      - echo "Building Insurance image"
+      - docker build -t hdfc-insurance:latest ./insurance
       - docker tag hdfc-insurance:latest "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$ECR_REPOSITORY:latest"
       - docker push "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$ECR_REPOSITORY:latest"
 
   post_build:
     commands:
-      - echo Creating imagedefinitions.json
-      - printf '[{"name":"%s","imageUri":"%s"}]' "$CONTAINER_NAME" "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$ECR_REPOSITORY:latest" > imagedefinitions.json
-      - cat imagedefinitions.json
+      - echo "Creating imagedefinitions.json"
+      - printf '[{"name":"%s","imageUri":"%s"}]' "$CONTAINER_NAME" "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$ECR_REPOSITORY:latest" > "$CODEBUILD_SRC_DIR/imagedefinitions.json"
+      - cat "$CODEBUILD_SRC_DIR/imagedefinitions.json"
+      - test -f "$CODEBUILD_SRC_DIR/imagedefinitions.json"
 
 artifacts:
   files:
     - imagedefinitions.json
+  base-directory: .
   discard-paths: yes
+```
